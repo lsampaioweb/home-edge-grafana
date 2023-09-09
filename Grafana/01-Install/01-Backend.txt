@@ -1,0 +1,107 @@
+01 - Copy all the necessary files to the server.
+  mkdir -p ~/grafana/files/
+  rsync -avh -e ssh /opt/certificates/edge-grafana-01.homelab/{*.crt,*.key} lsampaio-grafana-team@edge-grafana-01.homelab:~/grafana/files/
+  rsync -avh -e ssh Grafana/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/grafana/files/
+
+02 - Add Grafana APT repository.
+  The option -q turns off the status update message for wget, and -O outputs the file that you downloaded to the terminal. These two options ensure that only the contents of the downloaded file are pipelined. 
+  The > /dev/null option will hide the output from your terminal for security reasons.
+
+  sudo apt update &&
+  sudo apt-get install -y apt-transport-https software-properties-common wget &&
+  sudo wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
+
+  Add the Grafana repository to your APT sources:
+  echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+
+03 - Install Grafana.
+  sudo apt update &&
+  sudo apt install -y grafana &&
+  sudo systemctl daemon-reload &&
+  sudo systemctl enable grafana-server &&
+  sudo systemctl stop grafana-server
+
+04 - Configure Grafana for web access.
+  sudo nano /etc/grafana/grafana.ini
+    [server]
+    protocol = http
+    http_addr = 127.0.0.1
+    http_port = 3000
+    domain = edge-grafana-01.homelab
+
+  Disabling Anonymous Access
+    [auth.anonymous]
+    # enable anonymous access
+    enabled = false
+
+  Change the provider
+    [log.frontend]
+    # Defines which provider to use, default is Sentry
+    provider = grafana
+
+  Configure Grafana with OpenLDAP.
+    [auth.ldap]
+    # Set to `true` to enable LDAP integration (default: `false`)
+    enabled = true
+    # Allow sign-up should be `true` (default) to allow Grafana to create users on successful LDAP authentication.
+    # If set to `false` only already existing Grafana users will be able to login.
+    allow_sign_up = true
+
+    # Path to the LDAP specific configuration file (default: `/etc/grafana/ldap.toml`)
+    config_file = /etc/grafana/ldap.toml
+
+    Troubleshooting
+      To troubleshoot and get more log info enable LDAP debug logging in the main config file.
+    [log]
+    filters = ldap:debug
+
+  Setup the database
+    [database]
+    type = postgres
+    host = edge-postgresql-01.homelab:5432
+    name = grafana
+    user = grafana
+    # If the password contains # or ; you have to wrap it with triple quotes. Ex """#password;"""
+    password=<Keychain: "edge-grafana-01-db-user">
+
+05 - Configure LDAP access.
+  sudo mv ~/grafana/files/ldap.toml /etc/grafana/ldap.toml &&
+  sudo chown root:grafana /etc/grafana/ldap.toml &&
+  sudo touch /etc/grafana/ldap_bind_password
+  
+  sudo nano /etc/grafana/ldap.toml
+  password=<Keychain: "edge-grafana-01-ldap-reader">
+
+06 - Create initial database (On the postgresql server)
+  Run the following on your database host:
+    sudo -su postgres
+    cd
+    createuser grafana -e --pwprompt
+      Password: '<Keychain: "edge-grafana-01-db-user">'
+    createdb -e -O grafana -E Unicode -T template0 grafana
+
+    Test connection:
+      psql --host edge-postgresql-01.homelab -U grafana -d grafana
+      \dt
+
+    Restore a backup:
+      psql -h edge-postgresql-01.homelab -U grafana -d grafana -f grafana_dump.sql
+  
+    01 - Import the data. You will be prompted to enter your newly created password.
+      psql --host edge-postgresql-01.homelab -U grafana -d grafana -f server.sql
+      or 
+      psql --host 192.168.5.2 -U grafana -d grafana --password -f server.sql
+
+  Reiniciar os comandos:
+  psql
+  \l
+  DROP DATABASE grafana;
+  \du
+  DROP USER grafana;
+
+07 - Create the plugins folder.
+  sudo mkdir /var/lib/grafana/plugins &&
+  sudo chown -R grafana. /var/lib/grafana/plugins
+
+Start service:
+  sudo systemctl start grafana-server

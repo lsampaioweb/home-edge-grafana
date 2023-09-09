@@ -1,0 +1,46 @@
+01 - Install and setup Apache
+  sudo apt install -y apache2 ssl-cert
+
+  Disable used things.
+    sudo a2dissite 000-default.conf &&
+    sudo rm /etc/apache2/sites-available/*
+
+  Adjust the permissions.    
+    sudo mkdir /etc/grafana/web/ &&
+    sudo mv ~/grafana/files/{*.crt,*.key} /etc/grafana/web/ &&
+    sudo chown -R www-data:grafana /etc/grafana/web &&
+    sudo chmod 640 /etc/grafana/web/*.key
+
+  Copy the conf file.
+    sudo mv ~/grafana/files/grafana.conf /etc/apache2/sites-available/
+    sudo chown www-data. /etc/apache2/sites-available/*.conf
+  
+  Enable necessary modules.
+    sudo a2enmod rewrite &&
+    sudo a2enmod proxy &&
+    sudo a2enmod proxy_http &&
+    sudo a2enmod ssl &&
+    sudo a2ensite grafana
+
+  Verify is everything is correct and restart apache.
+  sudo apache2ctl configtest
+  sudo systemctl restart apache2
+
+  Check the logs
+    sudo cat /var/log/grafana/grafana.log
+
+  Check the opened ports.
+    sudo netstat -tulpn | grep LISTEN
+
+02 - Allow the port(s) in the UFW.
+  sudo ufw allow http comment 'Unsecure Grafana WebGui' &&
+  sudo ufw allow https/tcp comment 'Secure Grafana WebGui'
+  
+  This port will not be available from outside the server.
+  #sudo ufw allow 3000/tcp
+  #Other ports: 3000, 3100, 9080, 9093, and 9096.
+
+03 - Access Grafana Dashboard.
+  https://edge-grafana-01.homelab
+  username: admin 
+  password: admin

@@ -1,0 +1,17 @@
+01 - Install Grafana on Debian or Ubuntu
+  https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/
+
+02 - How To Install Grafana on Ubuntu 22.04|20.04|18.04
+  https://computingforgeeks.com/how-to-install-grafana-on-ubuntu-linux-2/
+
+03 - Install Grafana Ubuntu 20.04
+  https://statusengine.org/tutorials/Grafana-Focal/
+
+04 - Set up Grafana HTTPS for secure web traffic
+  https://grafana.com/docs/grafana/latest/setup-grafana/set-up-https/
+
+05 - Configure LDAP authentication
+  https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/ldap/
+
+06 - Configuring PostgreSQL for Grafana High Availability Setup
+  https://luppeng.wordpress.com/2022/05/01/configuring-postgresql-for-grafana-high-availability-setup/
