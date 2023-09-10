@@ -1,0 +1,79 @@
+01 - Prepare the disk that will contain the Loki's data.
+  Create the partition
+    sudo gdisk /dev/sdb
+
+  Create a Physical Volume (PV)
+    sudo pvcreate /dev/sdb1
+      Se der erro:
+      sudo wipefs -a /dev/sdb1
+
+  Create a Volume Group (VG)
+    sudo vgcreate lokidata-vg /dev/sdb1
+
+  Create a Logical Volume Management (LVM)
+    sudo lvcreate -n lokidata-lv -l 100%FREE lokidata-vg
+
+  Create a filesystem on the LV.
+    sudo mkfs.ext4 /dev/lokidata-vg/lokidata-lv
+
+  Create the folder
+    sudo mkdir -p /etc/loki /var/log/loki
+
+  Mount the LVM even after reboots
+    sudo nano /etc/fstab
+    # <file system> <mount point> <type> <options> <dump>  <pass>
+    /dev/lokidata-vg/lokidata-lv /etc/loki ext4 defaults,noatime 0 2
+
+  Test:
+    sudo mount -a
+    or
+    sudo mount /dev/lokidata-vg/lokidata-lv /etc/loki
+
+02 - "Install" Loki.
+  sudo apt install -y loki
+
+  Verify installation by checking version
+    loki --version
+
+  Change permissions
+    sudo chown -R loki: /etc/loki &&
+    sudo chown -R loki: /var/log/loki
+
+03 - Copy all the necessary files to the server.
+  mkdir -p ~/loki/files/
+  rsync -avh -e ssh Loki/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/loki/files/
+
+04 - Create the loki.service and the config file.
+  Config path:
+  sudo mv ~/loki/files/config.yml /etc/loki/config.yml &&
+  sudo chown loki: /etc/loki/config.yml
+
+  sudo systemctl edit --full loki.service
+  Copy the content from ~/loki/files/loki.service
+
+  Reload systemd
+    sudo systemctl daemon-reload
+
+  Start loki
+    sudo systemctl start loki
+
+  Check status
+    sudo systemctl status loki
+
+  Restart
+    sudo systemctl restart loki
+
+  Enable
+    sudo systemctl enable loki.service
+
+  Check the logs
+    sudo cat /var/log/loki/loki.log
+
+  Check the opened ports.
+    sudo netstat -tulpn | grep LISTEN
+
+05 - Access the Grafana Loki:
+  http://edge-grafana-01.homelab:3100/metrics
+
+  ** It should not work from outside the server because port 3100 is not allowed on UFW. It is only accessible from inside the server.
+  curl http://edge-grafana-01.homelab:3100/metrics

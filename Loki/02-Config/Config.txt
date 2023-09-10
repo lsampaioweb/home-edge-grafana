@@ -1,0 +1,15 @@
+01 - Create the Loki connection: 
+  On Grafana, open 
+  Home -> Connections -> Add new connection
+
+02 - Settings:
+  HTTP:
+    Name            : Loki
+    Default         : Checked
+    URL             : http://localhost:3100
+    Allowed cookies :
+    Timeout         :
+
+  Additional settings:
+    Alerting:
+      Manage alert rules in Alerting UI : Checked

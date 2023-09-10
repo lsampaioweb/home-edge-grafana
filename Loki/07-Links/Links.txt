@@ -1,0 +1,11 @@
+01 - Logging with Grafana Loki and MinIO
+  https://blog.min.io/logging-grafana-loki-and-minio/
+
+02 - How To Deploy Grafana Loki and Save Data to MinIO
+  https://blog.min.io/how-to-grafana-loki-minio/
+
+03 - How to Run Grafana Mimir with MinIO for Persistent Metrics Storage
+  https://blog.min.io/how-to-grafana-mimir-minio-persistent-metrics-storage/
+
+04 - MinIO with #Grafana Loki - Session 2: Demo of using MinIO to store Loki data
+  https://www.youtube.com/watch?v=8D9YdY_stzk

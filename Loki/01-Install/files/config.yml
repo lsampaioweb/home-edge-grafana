@@ -1,0 +1,107 @@
+# All options can be found here: https://grafana.com/docs/loki/latest/configure/
+
+# Enables authentication through the X-Scope-OrgID header, which must be present if true. If false, the OrgID will always be set to 'fake'.
+auth_enabled: false
+
+# Configures the server of the launched module(s).
+server:
+  # HTTP server listen port. Default = 3100
+  http_listen_port: 3100
+  # gRPC server listen port. Default = 9095
+  grpc_listen_port: 9096
+
+# Common configuration to be shared between multiple modules.
+# If a more specific configuration is given in other sections, the related configuration within this section will be ignored.
+common:
+  path_prefix: "/etc/loki"
+  replication_factor: 1
+  storage:
+    filesystem:
+      # Directory to store chunks in. Default = ""
+      chunks_directory: /etc/loki/chunks
+      # Directory to store rules in. Default = ""
+      rules_directory: /etc/loki/rules
+  ring:
+    # IP address to advertise in the ring.
+    instance_addr: "127.0.0.1"
+    kvstore:
+      # Backend storage to use for the ring. Supported values are: consul, etcd, inmemory, memberlist, multi. Default = "consul"
+      store: "inmemory"
+
+# Configures the query splitting and caching in the Loki query-frontend.
+query_range:
+  results_cache:
+    # Configures the cache backend.
+    cache:
+      embedded_cache:
+        # Whether embedded cache is enabled. Default = false
+        enabled: true
+        # Maximum memory size of the cache in MB.
+        max_size_mb: 100
+
+# Configures the chunk index schema and where it is stored.
+schema_config:
+  # list of period_configs. Configures what index schemas should be used for from specific time periods.
+  configs:
+    # The date of the first day that index buckets should be created.
+    # Use a date in the past if this is your only period_config, otherwise use a date when you want the schema to switch over.
+    # In YYYY-MM-DD format, for example: 2018-04-15.
+    - from: "2023-01-01"
+      # Which store to use for the index.
+      store: "tsdb"
+      # Which store to use for the chunks.
+      object_store: "filesystem"
+      # The schema version to use, current recommended schema is v12.
+      schema: "v12"
+      # Configures how the index is updated and stored.
+      index:
+        # Table prefix for all period tables. Default = ""
+        prefix: "index_"
+        # Table period.
+        period: "24h"
+
+# The storage_config block configures one of many possible stores for both the index and chunks.
+# Which configuration to be picked should be defined in schema_config block.
+storage_config:
+  # Configures storing index in an Object Store. (GCS/S3/Azure/Swift/COS/Filesystem) in a prometheus TSDB-like format.
+  # Required fields only required when TSDB is defined in config.
+  tsdb_shipper:
+    # Shared store for keeping index files. Supported types: gcs, s3, azure, cos, filesystem.
+    shared_store: "filesystem"
+    # Directory where ingesters would write index files which would then be uploaded by shipper to configured storage.
+    active_index_directory: "/etc/loki/data/tsdb-index"
+    # Cache location for restoring index files from storage for queries.
+    cache_location: "/etc/loki/data/tsdb-cache"
+
+# The query_scheduler block configures the Loki query scheduler. When configured it separates the tenant query queues from the query-frontend.
+query_scheduler:
+  # the TSDB index dispatches many more, but each individually smaller, requests.
+  # We increase the pending request queue sizes to compensate.
+  max_outstanding_requests_per_tenant: 32768
+
+# Configures the querier. Only appropriate when running all modules or just the querier.
+querier:
+  # Each `querier` component process runs a number of parallel workers to process queries simultaneously.
+  # You may want to adjust this up or down depending on your resource usage
+  # (more available cpu and memory can tolerate higher values and vice versa),
+  # but we find the most success running at around `16` with tsdb
+  max_concurrent: 16
+
+# Configures global limits for this instance of Promtail
+limits_config:
+  # Per-user ingestion rate limit in sample size per second. Units in MB.
+  # ingestion_rate_mb: 10
+  # Timeout when querying backends (ingesters or storage) during the execution of
+  # a query request. When a specific per-tenant timeout is used, the global
+  # timeout is ignored.
+  query_timeout: "1m"
+
+# Configures the Loki ruler.
+ruler:
+  # Comma-separated list of Alertmanager URLs to send notifications to.
+  alertmanager_url: "http://localhost:9093"
+
+# Configuration for usage report.
+analytics:
+  # Enable anonymous usage reporting.
+  reporting_enabled: false
