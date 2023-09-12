@@ -1,0 +1,75 @@
+01 - Remove old log file.
+  find /var/log -type f -iname '*.log' -print0 | xargs -0 truncate -s0;
+  find /var/log -type f -iname '*.gz' -print0 | xargs -0 rm;
+  find /var/log -type f -iname '*.[0-9]*' -print0 | xargs -0 rm;
+  sudo truncate --size=0 /var/log/dmesg;
+  sudo truncate --size=0 /var/log/faillog;
+  sudo truncate --size=0 /var/log/lastlog;
+  sudo truncate --size=0 /var/log/syslog;
+
+02 - Install Promtail.
+  sudo apt install -y promtail acl
+  
+  Verify installation by checking version
+    promtail --version
+
+  Create dir in /etc
+    sudo mkdir -p /var/log/promtail
+
+  Change permissions
+    sudo chown -R promtail: /etc/promtail &&
+    sudo chown -R promtail: /var/log/promtail &&
+    sudo setfacl -R -m u:promtail:rX /var/log
+
+03 - Copy all the necessary files to the server.
+  mkdir -p ~/promtail/files/
+  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/promtail/files/
+
+04 - Allow the port(s) in the UFW.
+  cat /etc/services | grep syslog
+  syslog		514/udp
+  sudo ufw allow syslog/udp comment "Promtail on the syslog port UDP" &&
+  sudo ufw allow syslog/tcp comment "Promtail on the syslog port TCP" &&
+  sudo ufw status
+
+05 - Create the promtail.service.
+  sudo systemctl edit --full promtail.service
+    * Copy the content from ~/promtail/files/promtail.service
+
+  Reload systemd
+    sudo systemctl daemon-reload
+
+  Config path:
+  sudo mv ~/promtail/files/config.yml /etc/promtail/config.yml &&
+  sudo chown promtail: /etc/promtail/config.yml
+
+  Start promtail
+    sudo systemctl start promtail
+
+  Check status
+    sudo systemctl status promtail
+
+  Restart
+    sudo systemctl restart promtail
+
+  Enable
+    sudo systemctl enable promtail.service
+
+  Check the logs
+    sudo cat /var/log/promtail/promtail.log 
+
+  Check the opened ports
+    sudo netstat -tulpn | grep LISTEN
+
+06 - Add suporte for syslog messages.
+  sudo mv ~/promtail/files/00-promtail-relay.conf /etc/rsyslog.d/ &&
+  sudo chown root. /etc/rsyslog.d/00-promtail-relay.conf
+
+  Start rsyslog
+    sudo systemctl restart rsyslog
+
+  Check status
+    sudo systemctl status rsyslog
+
+07 - Remove any left over files.
+  rmdir ~/promtail

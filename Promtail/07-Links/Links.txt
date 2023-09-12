@@ -1,0 +1,5 @@
+01 - Using Rsyslog and Promtail to relay syslog messages to Loki
+  https://alexandre.deverteuil.net/post/syslog-relay-for-loki/
+
+02 - Grafana Loki Configuration Syslog Server for Home Labs
+  https://www.virtualizationhowto.com/2022/11/grafana-loki-configuration-syslog-server-for-home-labs/

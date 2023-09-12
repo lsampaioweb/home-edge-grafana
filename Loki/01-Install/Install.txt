@@ -29,7 +29,7 @@
     or
     sudo mount /dev/lokidata-vg/lokidata-lv /etc/loki
 
-02 - "Install" Loki.
+02 - Install Loki.
   sudo apt install -y loki
 
   Verify installation by checking version
@@ -72,7 +72,10 @@
   Check the opened ports.
     sudo netstat -tulpn | grep LISTEN
 
-05 - Access the Grafana Loki:
+05 - Remove any left over files.
+  rmdir ~/loki
+
+06 - Access the Grafana Loki:
   http://edge-grafana-01.homelab:3100/metrics
 
   ** It should not work from outside the server because port 3100 is not allowed on UFW. It is only accessible from inside the server.
