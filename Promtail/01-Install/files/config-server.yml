@@ -1,3 +1,5 @@
+# Link: https://grafana.com/docs/loki/latest/send-data/promtail/configuration/
+
 # Configures the server for Promtail.
 server:
   # HTTP server listen port. Default = 80
@@ -8,25 +10,29 @@ server:
 # Describes how to save read file offsets to disk.
 positions:
   # Location of positions file.
-  # Default = "/var/log/positions.yaml"
   filename: "/etc/promtail/positions.yaml"
 
 # Describes how promtail connects to multiple instances of Loki, sending logs to each.
 clients:
-  # - url: http://localhost:3100/loki/api/v1/push
-  - url: "http://edge-grafana-01.homelab:3100/loki/api/v1/push"
+  - url: "http://localhost:3100/loki/api/v1/push"
 
 # Configures how Promtail can scrape logs from a series of targets using a specified discovery method.
 scrape_configs:
   # Name to identify this scrape config in the Promtail UI.
   - job_name: "syslog"
     syslog:
+      # TCP address to listen on. Has the format of "host:port".
       listen_address: "127.0.0.1:1514"
       listen_protocol: "tcp"
+      # The idle timeout for tcp syslog connections, default is 120 seconds.
       idle_timeout: "60s"
+      # Whether to convert syslog structured data to labels.
+      # A structured data entry of [example@99999 test="yes"] would become
+      # the label "__syslog_message_sd_example_99999_test" with the value "yes".
       label_structured_data: true
       labels:
         job: "syslog"
+
     relabel_configs:
       - source_labels: ["__syslog_message_hostname"]
         target_label: "host"
@@ -38,24 +44,6 @@ scrape_configs:
         target_label: "facility"
       - source_labels: ["__syslog_message_msg_id"]
         target_label: "message"
-      # - source_labels: ["__syslog_connection_hostname"]
-      #   target_label: "connection_hostname"
-
-  # # Name to identify this scrape config in the Promtail UI.
-  # - job_name: "system"
-  #   # Static targets to scrape.
-  #   static_configs:
-  #     # Specifying a list of targets and a common label set for them. It is the canonical way to specify static targets in a scrape configuration.
-  #     - targets:
-  #         - "localhost"
-  #       labels:
-  #         # A `job` label is fairly standard in prometheus and useful for linking metrics and logs.
-  #         job: "varlogs"
-  #         # It helps identify logs from this machine vs others.
-  #         #host: <yourhost>
-  #         host: "${HOSTNAME}"
-  #         # The path to load logs from. Can use glob patterns (e.g., /var/log/*.log).
-  #         __path__: "/var/log/**/*log"
 
 # Configures global limits for this instance of Promtail
 limits_config:
