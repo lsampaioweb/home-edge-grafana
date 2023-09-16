@@ -7,9 +7,21 @@
   sudo truncate --size=0 /var/log/lastlog;
   sudo truncate --size=0 /var/log/syslog;
 
-02 - Install Promtail.
+02 - Add Grafana APT repository.
+  The option -q turns off the status update message for wget, and -O outputs the file that you downloaded to the terminal. These two options ensure that only the contents of the downloaded file are pipelined.
+  The > /dev/null option will hide the output from your terminal for security reasons.
+
+  sudo apt update &&
+  sudo apt-get install -y apt-transport-https software-properties-common wget &&
+  sudo wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
+
+  Add the Grafana repository to your APT sources:
+  echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+
+03 - Install Promtail.
+  sudo apt update &&
   sudo apt install -y promtail acl
-  
+
   Verify installation by checking version
     promtail --version
 
@@ -22,27 +34,41 @@
     sudo setfacl -R -m u:promtail:rX /var/log
     sudo usermod -a -G systemd-journal promtail
 
-03 - Copy all the necessary files to the server.
+04 - Copy all the necessary files to the server.
   mkdir -p ~/promtail/files/
+  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-ldap-team@edge-ldap-01.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-postgresql-team@edge-postgresql-01.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-zabbix-team@edge-zabbix-01.homelab:~/promtail/files/ &&
   rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/promtail/files/
 
-04 - Allow the port(s) in the UFW.
-  cat /etc/services | grep syslog
-  syslog		514/udp
-  sudo ufw allow syslog/udp comment "Promtail on the syslog port UDP" &&
-  sudo ufw allow syslog/tcp comment "Promtail on the syslog port TCP" &&
-  sudo ufw status
+05 - Allow the port(s) in the UFW.
+  *** On the Promtail Server
+    cat /etc/services | grep syslog
+    syslog		514/udp
+    sudo ufw allow syslog/udp comment "Promtail on the syslog port UDP" &&
+    sudo ufw allow syslog/tcp comment "Promtail on the syslog port TCP" &&
+    sudo ufw status
 
-05 - Create the promtail.service.
+  *** On the Promtail Clients
+    sudo ufw allow 9080/tcp comment "Promtail Web Server" &&
+    sudo ufw status
+
+06 - Create the promtail.service.
   sudo systemctl edit --full promtail.service
     * Copy the content from ~/promtail/files/promtail.service
 
+  Config path:
+  *** On the Promtail Server
+  sudo mv ~/promtail/files/config-server.yml /etc/promtail/config.yml
+
+  *** On the Promtail Clients
+  sudo mv ~/promtail/files/config-client.yml /etc/promtail/config.yml
+
+
+  sudo chown promtail: /etc/promtail/config.yml
+
   Reload systemd
     sudo systemctl daemon-reload
-
-  Config path:
-  sudo mv ~/promtail/files/config.yml /etc/promtail/config.yml &&
-  sudo chown promtail: /etc/promtail/config.yml
 
   Start promtail
     sudo systemctl start promtail
@@ -57,12 +83,13 @@
     sudo systemctl enable promtail.service
 
   Check the logs
-    sudo cat /var/log/promtail/promtail.log 
+    sudo cat /var/log/promtail/promtail.log
 
   Check the opened ports
     sudo netstat -tulpn | grep LISTEN
 
-06 - Add suporte for syslog messages.
+07 - Add suporte for syslog messages.
+  *** On the Promtail Server
   sudo mv ~/promtail/files/00-promtail-relay.conf /etc/rsyslog.d/ &&
   sudo chown root. /etc/rsyslog.d/00-promtail-relay.conf
 
@@ -72,5 +99,5 @@
   Check status
     sudo systemctl status rsyslog
 
-07 - Remove any left over files.
-  rmdir ~/promtail
+08 - Remove any left over files.
+  sudo rm -rf ~/promtail

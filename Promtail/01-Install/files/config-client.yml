@@ -1,7 +1,11 @@
 # Link: https://grafana.com/docs/loki/latest/send-data/promtail/configuration/
 
-# Disable the HTTP and GRPC server.
-disable: false
+# Configures the server for Promtail.
+server:
+  # HTTP server listen port. Default = 80
+  http_listen_port: 9080
+  # gRPC server listen port. Default = 9095
+  grpc_listen_port: 0
 
 # Describes how to save read file offsets to disk.
 positions:
