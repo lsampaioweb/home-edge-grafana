@@ -20,16 +20,6 @@ clients:
 scrape_configs:
   # Name to identify this scrape config in the Promtail UI.
   - job_name: "system"
-    # Defines decompression behavior for the given scrape target.
-    decompression:
-      # Whether decompression should be tried or not.
-      enabled: true
-      # Initial delay to wait before starting the decompression.
-      # Especially useful in scenarios where compressed files are found before the compression is finished.
-      initial_delay: "10s"
-      # Compression format. Supported formats are: 'gz', 'bz2' and 'z.
-      format: "gz"
-
     # Static targets to scrape.
     static_configs:
       # Specifying a list of targets and a common label set for them. It is the canonical way to specify static targets in a scrape configuration.
@@ -42,6 +32,7 @@ scrape_configs:
           host: "${HOSTNAME}"
           # The path to load logs from. Can use glob patterns (e.g., /var/log/*.log).
           __path__: "/var/log/**/*log"
+          __path_exclude__: "/var/log/installer/*log"
 
 # Configures global limits for this instance of Promtail
 limits_config:
