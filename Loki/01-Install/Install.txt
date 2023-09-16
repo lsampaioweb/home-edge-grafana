@@ -43,7 +43,11 @@
   mkdir -p ~/loki/files/
   rsync -avh -e ssh Loki/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/loki/files/
 
-04 - Create the loki.service and the config file.
+04 - Allow the port(s) in the UFW.
+  sudo ufw allow 3100/tcp comment "Loki" &&
+  sudo ufw status
+
+05 - Create the loki.service and the config file.
   Config path:
   sudo mv ~/loki/files/config.yml /etc/loki/config.yml &&
   sudo chown loki: /etc/loki/config.yml
@@ -72,11 +76,8 @@
   Check the opened ports.
     sudo netstat -tulpn | grep LISTEN
 
-05 - Remove any left over files.
+06 - Remove any left over files.
   rmdir ~/loki
 
-06 - Access the Grafana Loki:
+07 - Access the Grafana Loki:
   http://edge-grafana-01.homelab:3100/metrics
-
-  ** It should not work from outside the server because port 3100 is not allowed on UFW. It is only accessible from inside the server.
-  curl http://edge-grafana-01.homelab:3100/metrics
