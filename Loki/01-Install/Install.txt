@@ -77,7 +77,7 @@
     sudo netstat -tulpn | grep LISTEN
 
 06 - Remove any left over files.
-  rmdir ~/loki
+  sudo rm -rf ~/loki
 
 07 - Access the Grafana Loki:
   http://edge-grafana-01.homelab:3100/metrics
