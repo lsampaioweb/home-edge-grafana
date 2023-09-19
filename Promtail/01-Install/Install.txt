@@ -31,7 +31,7 @@
   Change permissions
     sudo chown -R promtail: /etc/promtail &&
     sudo chown -R promtail: /var/log/promtail &&
-    sudo setfacl -R -m u:promtail:rX /var/log
+    sudo setfacl -R -m u:promtail:rX /var/log &&
     sudo usermod -a -G systemd-journal promtail
 
 04 - Copy all the necessary files to the server.
