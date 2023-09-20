@@ -32,7 +32,10 @@
     sudo chown -R promtail: /etc/promtail &&
     sudo chown -R promtail: /var/log/promtail &&
     sudo setfacl -R -m u:promtail:rX /var/log &&
-    sudo usermod -a -G systemd-journal promtail
+    sudo setfacl -R -m u:promtail:rX /var/log/** &&
+    #sudo usermod -a -G systemd-journal promtail &&
+    #sudo usermod -a -G adm promtail    
+    #getfacl /var/log/**
 
 04 - Copy all the necessary files to the server.
   mkdir -p ~/promtail/files/
