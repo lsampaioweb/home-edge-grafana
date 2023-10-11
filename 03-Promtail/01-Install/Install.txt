@@ -1,13 +1,4 @@
-01 - Remove old log file.
-  find /var/log -type f -iname '*.log' -print0 | xargs -0 truncate -s0;
-  find /var/log -type f -iname '*.gz' -print0 | xargs -0 rm;
-  find /var/log -type f -iname '*.[0-9]*' -print0 | xargs -0 rm;
-  sudo truncate --size=0 /var/log/dmesg;
-  sudo truncate --size=0 /var/log/faillog;
-  sudo truncate --size=0 /var/log/lastlog;
-  sudo truncate --size=0 /var/log/syslog;
-
-02 - Add Grafana APT repository.
+01 - Add Grafana APT repository.
   The option -q turns off the status update message for wget, and -O outputs the file that you downloaded to the terminal. These two options ensure that only the contents of the downloaded file are pipelined.
   The > /dev/null option will hide the output from your terminal for security reasons.
 
@@ -18,7 +9,7 @@
   Add the Grafana repository to your APT sources:
   echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
 
-03 - Install Promtail.
+02 - Install Promtail.
   sudo apt update &&
   sudo apt install -y promtail acl
 
@@ -33,18 +24,19 @@
     sudo chown -R promtail: /var/log/promtail &&
     sudo setfacl -R -m u:promtail:rX /var/log &&
     sudo setfacl -R -m u:promtail:rX /var/log/** &&
-    #sudo usermod -a -G systemd-journal promtail &&
-    #sudo usermod -a -G adm promtail    
+    sudo usermod -a -G systemd-journal promtail &&
+    sudo usermod -a -G adm promtail
     #getfacl /var/log/**
 
-04 - Copy all the necessary files to the server.
+03 - Copy all the necessary files to the server.
   mkdir -p ~/promtail/files/
-  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-ldap-team@edge-ldap-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-postgresql-team@edge-postgresql-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-zabbix-team@edge-zabbix-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/promtail/files/
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-ldap-team@edge-ldap-01.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-postgresql-team@edge-postgresql-01.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-zabbix-team@edge-zabbix-01.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/promtail/files/
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-01.homelab:~/promtail/files/
 
-05 - Allow the port(s) in the UFW.
+04 - Allow the port(s) in the UFW.
   *** On the Promtail Server
     cat /etc/services | grep syslog
     syslog		514/udp
@@ -56,7 +48,7 @@
     sudo ufw allow 9080/tcp comment "Promtail Web Server" &&
     sudo ufw status
 
-06 - Create the promtail.service.
+05 - Create the promtail.service.
   sudo systemctl edit --full promtail.service
     * Copy the content from ~/promtail/files/promtail.service
 
@@ -66,7 +58,6 @@
 
   *** On the Promtail Clients
   sudo mv ~/promtail/files/config-client.yml /etc/promtail/config.yml
-
 
   sudo chown promtail: /etc/promtail/config.yml
 
@@ -91,7 +82,7 @@
   Check the opened ports
     sudo netstat -tulpn | grep LISTEN
 
-07 - Add suporte for syslog messages.
+06 - Add suporte for syslog messages.
   *** On the Promtail Server
   sudo mv ~/promtail/files/00-promtail-relay.conf /etc/rsyslog.d/ &&
   sudo chown root. /etc/rsyslog.d/00-promtail-relay.conf
@@ -102,5 +93,5 @@
   Check status
     sudo systemctl status rsyslog
 
-08 - Remove any left over files.
+07 - Remove any left over files.
   sudo rm -rf ~/promtail
