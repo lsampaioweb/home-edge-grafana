@@ -1,10 +1,10 @@
 01 - Copy all the necessary files to the server.
   mkdir -p ~/grafana/files/
   rsync -avh -e ssh /opt/certificates/edge-grafana-01.homelab/{*.crt,*.key} lsampaio-grafana-team@edge-grafana-01.homelab:~/grafana/files/
-  rsync -avh -e ssh Grafana/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/grafana/files/
+  rsync -avh -e ssh 01-Grafana/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/grafana/files/
 
 02 - Add Grafana APT repository.
-  The option -q turns off the status update message for wget, and -O outputs the file that you downloaded to the terminal. These two options ensure that only the contents of the downloaded file are pipelined. 
+  The option -q turns off the status update message for wget, and -O outputs the file that you downloaded to the terminal. These two options ensure that only the contents of the downloaded file are pipelined.
   The > /dev/null option will hide the output from your terminal for security reasons.
 
   sudo apt update &&
@@ -68,7 +68,7 @@
   sudo mv ~/grafana/files/ldap.toml /etc/grafana/ldap.toml &&
   sudo chown root:grafana /etc/grafana/ldap.toml &&
   sudo touch /etc/grafana/ldap_bind_password
-  
+
   sudo nano /etc/grafana/ldap.toml
   password=<Keychain: "edge-grafana-01-ldap-reader">
 
@@ -86,10 +86,10 @@
 
     Restore a backup:
       psql -h edge-postgresql-01.homelab -U grafana -d grafana -f grafana_dump.sql
-  
+
     01 - Import the data. You will be prompted to enter your newly created password.
       psql --host edge-postgresql-01.homelab -U grafana -d grafana -f server.sql
-      or 
+      or
       psql --host 192.168.5.2 -U grafana -d grafana --password -f server.sql
 
   Reiniciar os comandos:
