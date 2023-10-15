@@ -22,10 +22,10 @@
   Change permissions
     sudo chown -R promtail: /etc/promtail &&
     sudo chown -R promtail: /var/log/promtail &&
-    sudo setfacl -R -m u:promtail:rX /var/log &&
-    sudo setfacl -R -m u:promtail:rX /var/log/** &&
     sudo usermod -a -G systemd-journal promtail &&
-    sudo usermod -a -G adm promtail
+    sudo usermod -a -G adm promtail &&
+    sudo setfacl -R -m u:promtail:rX /var/log &&
+    sudo setfacl -R -m u:promtail:rX /var/log/**
     #getfacl /var/log/**
 
 03 - Copy all the necessary files to the server.
@@ -33,8 +33,9 @@
   rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-ldap-team@edge-ldap-01.homelab:~/promtail/files/ &&
   rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-postgresql-team@edge-postgresql-01.homelab:~/promtail/files/ &&
   rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-zabbix-team@edge-zabbix-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/promtail/files/
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-01.homelab:~/promtail/files/
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-01.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-02.homelab:~/promtail/files/
 
 04 - Allow the port(s) in the UFW.
   *** On the Promtail Server
@@ -64,17 +65,9 @@
   Reload systemd
     sudo systemctl daemon-reload
 
-  Start promtail
-    sudo systemctl start promtail
-
-  Check status
+    sudo systemctl restart promtail &&
+    sudo systemctl enable promtail &&
     sudo systemctl status promtail
-
-  Restart
-    sudo systemctl restart promtail
-
-  Enable
-    sudo systemctl enable promtail.service
 
   Check the logs
     sudo cat /var/log/promtail/promtail.log
@@ -82,7 +75,7 @@
   Check the opened ports
     sudo netstat -tulpn | grep LISTEN
 
-06 - Add suporte for syslog messages.
+06 - Add support for syslog messages.
   *** On the Promtail Server
   sudo mv ~/promtail/files/00-promtail-relay.conf /etc/rsyslog.d/ &&
   sudo chown root. /etc/rsyslog.d/00-promtail-relay.conf
