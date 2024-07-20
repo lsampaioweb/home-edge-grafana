@@ -30,12 +30,12 @@
 
 03 - Copy all the necessary files to the server.
   mkdir -p ~/promtail/files/
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-ldap-team@edge-ldap-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-postgresql-team@edge-postgresql-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-zabbix-team@edge-zabbix-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-01.homelab:~/promtail/files/ &&
-  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-02.homelab:~/promtail/files/
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-ldap-team@edge-ldap-01.lan.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-postgresql-team@edge-postgresql-01.lan.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-zabbix-team@edge-zabbix-01.lan.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.lan.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-01.lan.homelab:~/promtail/files/ &&
+  rsync -avh -e ssh 03-Promtail/01-Install/files/ lsampaio-minio-team@edge-minio-02.lan.homelab:~/promtail/files/
 
 04 - Allow the port(s) in the UFW.
   *** On the Promtail Server

@@ -1,7 +1,7 @@
 01 - Copy all the necessary files to the server.
   mkdir -p ~/grafana/files/
-  rsync -avh -e ssh /opt/certificates/edge-grafana-01.homelab/{*.crt,*.key} lsampaio-grafana-team@edge-grafana-01.homelab:~/grafana/files/
-  rsync -avh -e ssh 01-Grafana/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/grafana/files/
+  rsync -avh -e ssh /opt/certificates/edge-grafana-01.lan.homelab/{*.crt,*.key} lsampaio-grafana-team@edge-grafana-01.lan.homelab:~/grafana/files/
+  rsync -avh -e ssh 01-Grafana/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.lan.homelab:~/grafana/files/
 
 02 - Add Grafana APT repository.
   The option -q turns off the status update message for wget, and -O outputs the file that you downloaded to the terminal. These two options ensure that only the contents of the downloaded file are pipelined.
@@ -27,7 +27,7 @@
     protocol = http
     http_addr = 127.0.0.1
     http_port = 3000
-    domain = edge-grafana-01.homelab
+    domain = edge-grafana-01.lan.homelab
 
   Disabling Anonymous Access
     [auth.anonymous]
@@ -58,7 +58,7 @@
   Setup the database
     [database]
     type = postgres
-    host = edge-postgresql-01.homelab:5432
+    host = edge-postgresql-01.lan.homelab:5432
     name = grafana
     user = grafana
     # If the password contains # or ; you have to wrap it with triple quotes. Ex """#password;"""
@@ -81,14 +81,14 @@
     createdb -e -O grafana -E Unicode -T template0 grafana
 
     Test connection:
-      psql --host edge-postgresql-01.homelab -U grafana -d grafana
+      psql --host edge-postgresql-01.lan.homelab -U grafana -d grafana
       \dt
 
     Restore a backup:
-      psql -h edge-postgresql-01.homelab -U grafana -d grafana -f grafana_dump.sql
+      psql -h edge-postgresql-01.lan.homelab -U grafana -d grafana -f grafana_dump.sql
 
     01 - Import the data. You will be prompted to enter your newly created password.
-      psql --host edge-postgresql-01.homelab -U grafana -d grafana -f server.sql
+      psql --host edge-postgresql-01.lan.homelab -U grafana -d grafana -f server.sql
       or
       psql --host 192.168.5.2 -U grafana -d grafana --password -f server.sql
 
