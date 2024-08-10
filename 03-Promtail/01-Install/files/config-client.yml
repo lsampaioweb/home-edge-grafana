@@ -14,7 +14,7 @@ positions:
 
 # Describes how promtail connects to multiple instances of Loki, sending logs to each.
 clients:
-  - url: "http://edge-grafana-01.homelab:3100/loki/api/v1/push"
+  - url: "http://edge-grafana-01.lan.homelab:3100/loki/api/v1/push"
 
 # Configures how Promtail can scrape logs from a series of targets using a specified discovery method.
 scrape_configs:

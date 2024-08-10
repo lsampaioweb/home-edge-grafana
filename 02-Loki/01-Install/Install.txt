@@ -41,7 +41,7 @@
 
 03 - Copy all the necessary files to the server.
   mkdir -p ~/loki/files/
-  rsync -avh -e ssh Loki/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.homelab:~/loki/files/
+  rsync -avh -e ssh Loki/01-Install/files/ lsampaio-grafana-team@edge-grafana-01.lan.homelab:~/loki/files/
 
 04 - Allow the port(s) in the UFW.
   sudo ufw allow 3100/tcp comment "Loki" &&
@@ -80,4 +80,4 @@
   sudo rm -rf ~/loki
 
 07 - Access the Grafana Loki:
-  http://edge-grafana-01.homelab:3100/metrics
+  http://edge-grafana-01.lan.homelab:3100/metrics

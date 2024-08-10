@@ -5,7 +5,7 @@
     sudo a2dissite 000-default.conf &&
     sudo rm /etc/apache2/sites-available/*
 
-  Adjust the permissions.    
+  Adjust the permissions.
     sudo mkdir /etc/grafana/web/ &&
     sudo mv ~/grafana/files/{*.crt,*.key} /etc/grafana/web/ &&
     sudo chown -R www-data:grafana /etc/grafana/web &&
@@ -14,7 +14,7 @@
   Copy the conf file.
     sudo mv ~/grafana/files/grafana.conf /etc/apache2/sites-available/
     sudo chown www-data. /etc/apache2/sites-available/*.conf
-  
+
   Enable necessary modules.
     sudo a2enmod rewrite &&
     sudo a2enmod proxy &&
@@ -35,12 +35,12 @@
 02 - Allow the port(s) in the UFW.
   sudo ufw allow http comment 'Unsecure Grafana WebGui' &&
   sudo ufw allow https/tcp comment 'Secure Grafana WebGui'
-  
+
   This port will not be available from outside the server.
   #sudo ufw allow 3000/tcp
   #Other ports: 3000, 3100, 9080, 9093, and 9096.
 
 03 - Access Grafana Dashboard.
-  https://edge-grafana-01.homelab
-  username: admin 
+  https://edge-grafana-01.lan.homelab
+  username: admin
   password: admin
