@@ -24,6 +24,7 @@
     sudo chown -R promtail: /var/log/promtail &&
     sudo usermod -a -G systemd-journal promtail &&
     sudo usermod -a -G adm promtail &&
+    sudo usermod -a -G zabbix promtail &&
     sudo setfacl -R -m u:promtail:rX /var/log &&
     sudo setfacl -R -m u:promtail:rX /var/log/**
     #getfacl /var/log/**
@@ -63,8 +64,7 @@
   sudo chown promtail: /etc/promtail/config.yml
 
   Reload systemd
-    sudo systemctl daemon-reload
-
+    sudo systemctl daemon-reload &&
     sudo systemctl restart promtail &&
     sudo systemctl enable promtail &&
     sudo systemctl status promtail
